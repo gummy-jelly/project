@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>CloudPrep — 퀴즈 설정</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&family=Orbitron:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<style>
+  :root {
+    --bg-base:#F5F7FF; --bg-1:#FFFFFF; --bg-2:#EEF1FA; --bg-3:#E3E8F5;
+    --border:#D4DAEE; --border-hi:#C0C9E2;
+    --text-1:#1A1E2E; --text-2:#4B5280; --text-3:#8A93B0;
+    --blue:#5B8BFF; --blue-dim:rgba(91,139,255,0.08);
+    --amber:#F0A429; --amber-dim:rgba(240,164,41,0.1);
+    --radius-sm:6px; --radius-md:10px; --radius-lg:14px; --radius-xl:20px;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'DM Sans', sans-serif; background: var(--bg-base);
+    color: var(--text-1); min-height: 100vh; display: flex; flex-direction: column;
+    background-image:
+      linear-gradient(rgba(91,139,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(91,139,255,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+  }
+
+  header {
+    height: 60px; display: flex; align-items: center; padding: 0 40px;
+    gap: 48px; border-bottom: 1px solid var(--border);
+    background: rgba(245,247,255,0.92); backdrop-filter: blur(20px);
+    position: sticky; top: 0; z-index: 100;
+  }
+  .logo { display: flex; align-items: center; gap: 9px; text-decoration: none; }
+  .logo-icon { width: 30px; height: 30px; background: var(--blue); border-radius: var(--radius-sm); display: grid; place-items: center; font-size: 16px; color: #fff; font-variation-settings: 'FILL' 1; }
+  .logo-text { font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 700; color: var(--text-1); letter-spacing: -0.3px; }
+  nav { display: flex; align-items: center; gap: 4px; flex: 1; }
+  nav a { padding: 6px 14px; border-radius: var(--radius-sm); font-size: 13px; font-weight: 500; text-decoration: none; color: var(--text-2); transition: all 0.15s; }
+  nav a:hover { color: var(--text-1); background: var(--bg-3); }
+  nav a.active { color: var(--blue); background: var(--blue-dim); }
+  .header-right { margin-left: auto; }
+  .avatar { width: 34px; height: 34px; border-radius: 50%; background: linear-gradient(135deg, var(--blue) 0%, #8B6FFF 100%); display: grid; place-items: center; font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700; color: #fff; cursor: pointer; }
+
+  main { flex: 1; display: flex; align-items: center; justify-content: center; padding: 48px 24px; }
+
+  .setup-card {
+    width: 100%; max-width: 620px;
+    background: var(--bg-1); border: 1px solid var(--border);
+    border-radius: var(--radius-xl); overflow: hidden;
+    animation: fadeUp 0.4s ease both;
+  }
+  @keyframes fadeUp { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
+
+  .setup-head {
+    padding: 32px 36px 24px; border-bottom: 1px solid var(--border);
+    position: relative; overflow: hidden;
+  }
+  .setup-head::before {
+    content: ''; position: absolute; top: -50px; right: -50px;
+    width: 220px; height: 220px;
+    background: radial-gradient(circle, rgba(91,139,255,0.08) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .setup-head h1 { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 700; letter-spacing: -0.4px; margin-bottom: 5px; }
+  .setup-head p { font-size: 13px; color: var(--text-2); }
+
+  .setup-body { padding: 28px 36px; display: flex; flex-direction: column; gap: 28px; }
+
+  .section { display: flex; flex-direction: column; gap: 10px; }
+  .section-label { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; color: var(--text-3); }
+
+  /* 시험 종류 */
+  .exam-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  .exam-card {
+    padding: 14px; border: 2px solid var(--border);
+    border-radius: var(--radius-lg); cursor: pointer;
+    transition: all 0.2s; background: var(--bg-2); position: relative;
+  }
+  .exam-card:hover:not(.disabled) { border-color: var(--border-hi); }
+  .exam-card.selected { border-color: var(--blue); background: var(--blue-dim); }
+  .exam-card.disabled { opacity: 0.4; cursor: not-allowed; }
+  .exam-card-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 5px; }
+  .exam-card-name { font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700; }
+  .exam-badge {
+    font-family: 'Orbitron', sans-serif; font-size: 8px; font-weight: 400;
+    padding: 2px 6px; border-radius: 4px;
+  }
+  .exam-badge.live { background: var(--blue-dim); color: var(--blue); border: 1px solid rgba(91,139,255,0.2); }
+  .exam-badge.soon { background: var(--bg-3); color: var(--text-3); border: 1px solid var(--border); }
+  .exam-card-sub { font-size: 10px; color: var(--text-3); line-height: 1.4; }
+
+  /* 모드 */
+  .mode-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .mode-card { padding: 18px; border: 2px solid var(--border); border-radius: var(--radius-lg); cursor: pointer; transition: all 0.2s; background: var(--bg-2); }
+  .mode-card:hover { border-color: var(--border-hi); }
+  .mode-card.active-practice { border-color: var(--blue); background: var(--blue-dim); }
+  .mode-card.active-exam { border-color: var(--amber); background: var(--amber-dim); }
+  .mode-top { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 12px; }
+  .mode-icon { width: 36px; height: 36px; border-radius: var(--radius-sm); display: grid; place-items: center; font-size: 18px; font-variation-settings: 'FILL' 1; }
+  .mode-icon.practice { background: var(--blue-dim); color: var(--blue); }
+  .mode-icon.exam { background: var(--amber-dim); color: var(--amber); }
+  .mode-radio { width: 18px; height: 18px; border-radius: 50%; border: 2px solid var(--border); background: var(--bg-3); display: grid; place-items: center; flex-shrink: 0; transition: all 0.2s; }
+  .mode-radio.on-blue  { border-color: var(--blue);  background: var(--blue);  }
+  .mode-radio.on-amber { border-color: var(--amber); background: var(--amber); }
+  .mode-radio-dot { width: 6px; height: 6px; border-radius: 50%; background: #fff; opacity: 0; transition: opacity 0.2s; }
+  .mode-radio.on-blue .mode-radio-dot, .mode-radio.on-amber .mode-radio-dot { opacity: 1; }
+  .mode-name { font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700; margin-bottom: 4px; }
+  .mode-desc { font-size: 12px; color: var(--text-2); line-height: 1.5; }
+
+  /* 슬라이더 */
+  .slider-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+  .slider-count { font-family: 'Orbitron', sans-serif; font-size: 20px; font-weight: 500; color: var(--blue); }
+  .slider-count span { font-size: 11px; font-weight: 400; color: var(--text-3); margin-left: 4px; }
+  .slider-max { font-size: 11px; color: var(--text-3); }
+  .slider-max b { font-family: 'Orbitron', sans-serif; font-size: 10px; font-weight: 500; color: var(--text-2); }
+  input[type=range] { -webkit-appearance: none; width: 100%; height: 4px; background: var(--bg-3); border-radius: 99px; outline: none; cursor: pointer; }
+  input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; border-radius: 50%; background: var(--blue); cursor: pointer; box-shadow: 0 0 0 4px var(--blue-dim); border: 2px solid var(--bg-1); }
+  .slider-labels { display: flex; justify-content: space-between; margin-top: 8px; font-size: 10px; color: var(--text-3); font-family: 'Orbitron', sans-serif; }
+
+  /* 태그 칩 */
+  .tag-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+  .tag-chip {
+    display: flex; align-items: center; gap: 6px;
+    padding: 7px 13px; border: 1px solid var(--border);
+    border-radius: 99px; cursor: pointer;
+    font-size: 12px; font-weight: 500; color: var(--text-2);
+    background: var(--bg-2); transition: all 0.15s; user-select: none;
+  }
+  .tag-chip:hover { border-color: var(--border-hi); color: var(--text-1); }
+  .tag-chip.selected { border-color: var(--blue); color: var(--blue); background: var(--blue-dim); }
+  .tag-chip.all-chip { color: var(--text-1); background: var(--bg-3); font-weight: 600; }
+  .tag-chip.all-chip.selected { border-color: var(--blue); color: var(--blue); background: var(--blue-dim); }
+  .tag-chip .material-symbols-rounded { font-size: 14px; font-variation-settings: 'FILL' 0, 'wght' 300; }
+
+  .setup-foot { padding: 20px 36px; border-top: 1px solid var(--border); background: var(--bg-2); display: flex; align-items: center; justify-content: space-between; }
+  .back-btn { display: flex; align-items: center; gap: 6px; padding: 10px 18px; background: none; border: 1px solid var(--border); border-radius: var(--radius-md); font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500; color: var(--text-2); cursor: pointer; transition: all 0.15s; text-decoration: none; }
+  .back-btn:hover { border-color: var(--border-hi); color: var(--text-1); }
+  .back-btn .material-symbols-rounded { font-size: 16px; }
+  .start-btn { display: flex; align-items: center; gap: 8px; padding: 12px 28px; background: var(--blue); border: none; border-radius: var(--radius-md); font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700; color: #fff; cursor: pointer; transition: all 0.2s; }
+  .start-btn:hover { background: #7099FF; transform: translateY(-1px); box-shadow: 0 8px 24px rgba(91,139,255,0.25); }
+  .start-btn .material-symbols-rounded { font-size: 17px; }
+</style>
+</head>
+<body>
+
+<header>
+  <a href="home.html" class="logo">
+    <span class="logo-icon material-symbols-rounded">school</span>
+    <span class="logo-text">CloudPrep</span>
+  </a>
+  <nav>
+    <a href="home.html">대시보드</a>
+    <a href="#" class="active">문제 풀기</a>
+  </nav>
+  <div class="header-right">
+    <div class="avatar" id="user-avatar">?</div>
+  </div>
+</header>
+
+<main>
+  <div class="setup-card">
+    <div class="setup-head">
+      <h1>세션 설정</h1>
+      <p>원하는 학습 환경을 설정하세요</p>
+    </div>
+
+    <div class="setup-body">
+
+      <!-- 시험 종류 -->
+      <div class="section">
+        <div class="section-label">시험 종류</div>
+        <div class="exam-grid">
+          <div class="exam-card selected" id="exam-SAA" onclick="selectExam('SAA')">
+            <div class="exam-card-top">
+              <div class="exam-card-name">SAA</div>
+              <span class="exam-badge live">997</span>
+            </div>
+            <div class="exam-card-sub">Solutions Architect Associate</div>
+          </div>
+          <div class="exam-card disabled" id="exam-SAP">
+            <div class="exam-card-top">
+              <div class="exam-card-name">SAP</div>
+              <span class="exam-badge soon">SOON</span>
+            </div>
+            <div class="exam-card-sub">Solutions Architect Professional</div>
+          </div>
+          <div class="exam-card disabled" id="exam-CLF">
+            <div class="exam-card-top">
+              <div class="exam-card-name">CLF</div>
+              <span class="exam-badge soon">SOON</span>
+            </div>
+            <div class="exam-card-sub">Cloud Practitioner</div>
+          </div>
+          <div class="exam-card disabled" id="exam-DVA">
+            <div class="exam-card-top">
+              <div class="exam-card-name">DVA</div>
+              <span class="exam-badge soon">SOON</span>
+            </div>
+            <div class="exam-card-sub">Developer Associate</div>
+          </div>
+          <div class="exam-card disabled" id="exam-SOA">
+            <div class="exam-card-top">
+              <div class="exam-card-name">SOA</div>
+              <span class="exam-badge soon">SOON</span>
+            </div>
+            <div class="exam-card-sub">SysOps Administrator</div>
+          </div>
+          <div class="exam-card disabled" id="exam-ANS">
+            <div class="exam-card-top">
+              <div class="exam-card-name">ANS</div>
+              <span class="exam-badge soon">SOON</span>
+            </div>
+            <div class="exam-card-sub">Advanced Networking</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 소분류 카테고리 -->
+      <div class="section">
+        <div class="section-label">카테고리 <span style="font-size:10px;color:var(--text-3);font-weight:400;text-transform:none;letter-spacing:0">— 복수 선택 가능</span></div>
+        <div class="tag-grid" id="tag-grid"></div>
+        <div id="tag-hint" style="font-size:11px;color:var(--text-3);margin-top:4px">전체 문제 포함</div>
+      </div>
+
+      <!-- 학습 모드 -->
+      <div class="section">
+        <div class="section-label">Learning Mode</div>
+        <div class="mode-grid">
+          <div class="mode-card active-practice" id="card-practice" onclick="selectMode('practice')">
+            <div class="mode-top">
+              <div class="mode-icon practice material-symbols-rounded">notes</div>
+              <div class="mode-radio on-blue" id="radio-practice"><div class="mode-radio-dot"></div></div>
+            </div>
+            <div class="mode-name">Practice</div>
+            <div class="mode-desc">정답과 해설을 즉시 확인합니다</div>
+          </div>
+          <div class="mode-card" id="card-exam" onclick="selectMode('exam')">
+            <div class="mode-top">
+              <div class="mode-icon exam material-symbols-rounded">local_fire_department</div>
+              <div class="mode-radio" id="radio-exam"><div class="mode-radio-dot"></div></div>
+            </div>
+            <div class="mode-name">Exam</div>
+            <div class="mode-desc">시간 제한, 종료 후 채점합니다</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 문제 수 -->
+      <div class="section">
+        <div class="section-label">Number of Questions</div>
+        <div class="slider-row">
+          <div class="slider-count" id="q-display">20 <span>Questions</span></div>
+          <div class="slider-max">최대 <b id="q-max-label">997</b></div>
+        </div>
+        <input type="range" id="q-slider" min="1" max="50" value="20"
+          oninput="onSlider(this.value)"/>
+        <div class="slider-labels">
+          <span>1</span>
+          <span id="slider-max-label">50 MAX</span>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="setup-foot">
+      <a href="home.html" class="back-btn">
+        <span class="material-symbols-rounded">arrow_back</span>
+        Back
+      </a>
+      <button class="start-btn" onclick="startSession()">
+        Start Session
+        <span class="material-symbols-rounded">play_arrow</span>
+      </button>
+    </div>
+  </div>
+</main>
+
+<script>
+const API   = 'http://localhost:4000/api';
+const token = localStorage.getItem('token');
+const user  = JSON.parse(localStorage.getItem('user') || 'null');
+if (!token || !user) {
+  sessionStorage.setItem('redirectAfterLogin', 'quiz_setup.html');
+  location.href = 'login.html';
+}
+document.getElementById('user-avatar').textContent = user?.email?.[0]?.toUpperCase() || '?';
+
+// 로그아웃
+document.getElementById('user-avatar').addEventListener('click', () => {
+  if (confirm('로그아웃 하시겠습니까?')) {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    location.href = 'login.html';
+  }
+});
+
+const EXAM_MAX = { SAA: 50 };
+
+// SAA 소분류 10개
+const SAA_TAGS = [
+  { key: 'compute',    label: 'EC2 / 컴퓨팅',   icon: 'memory' },
+  { key: 'storage',    label: '스토리지',         icon: 'database' },
+  { key: 'network',    label: '네트워킹 / VPC',   icon: 'lan' },
+  { key: 'security',   label: '보안 / IAM',       icon: 'shield' },
+  { key: 'database',   label: '데이터베이스',      icon: 'table_chart' },
+  { key: 'serverless', label: '서버리스',          icon: 'bolt' },
+  { key: 'ha',         label: '고가용성 / DR',    icon: 'sync_alt' },
+  { key: 'monitoring', label: '모니터링 / 로깅',  icon: 'monitoring' },
+  { key: 'migration',  label: '마이그레이션',      icon: 'move_up' },
+  { key: 'cost',       label: '비용 최적화',       icon: 'savings' },
+];
+
+const EXAM_TAGS = { SAA: SAA_TAGS };
+
+let selectedExam = 'SAA';
+let selectedTags = []; // 빈 배열 = ALL
+let selectedMode = 'practice';
+
+function selectExam(exam) {
+  if (document.getElementById('exam-' + exam).classList.contains('disabled')) return;
+  document.querySelectorAll('.exam-card').forEach(c => c.classList.remove('selected'));
+  document.getElementById('exam-' + exam).classList.add('selected');
+  selectedExam = exam;
+  selectedTags = [];
+  const max = EXAM_MAX[exam] || 50;
+  const slider = document.getElementById('q-slider');
+  slider.max = max;
+  if (parseInt(slider.value) > max) slider.value = max;
+  document.getElementById('q-max-label').textContent = max;
+  document.getElementById('slider-max-label').textContent = max + ' MAX';
+  onSlider(slider.value);
+  renderTags();
+}
+
+function renderTags() {
+  const tags = EXAM_TAGS[selectedExam] || [];
+  const grid = document.getElementById('tag-grid');
+  const allOn = selectedTags.length === 0;
+
+  let html = `<div class="tag-chip all-chip ${allOn ? 'selected' : ''}" onclick="selectAllTags()">
+    <span class="material-symbols-rounded">apps</span>ALL
+  </div>`;
+  tags.forEach(t => {
+    const on = selectedTags.includes(t.key);
+    html += `<div class="tag-chip ${on ? 'selected' : ''}" onclick="toggleTag('${t.key}')">
+      <span class="material-symbols-rounded">${t.icon}</span>${t.label}
+    </div>`;
+  });
+  grid.innerHTML = html;
+
+  const hint = document.getElementById('tag-hint');
+  if (allOn) {
+    hint.textContent = '전체 문제 포함';
+  } else {
+    const names = tags.filter(t => selectedTags.includes(t.key)).map(t => t.label).join(', ');
+    hint.innerHTML = `<b style="color:var(--blue);font-family:'Orbitron',sans-serif;font-size:10px;font-weight:500">${selectedTags.length}개</b> 선택 — ${names}`;
+  }
+}
+
+function toggleTag(key) {
+  const idx = selectedTags.indexOf(key);
+  if (idx === -1) selectedTags.push(key);
+  else selectedTags.splice(idx, 1);
+  renderTags();
+}
+
+function selectAllTags() {
+  selectedTags = [];
+  renderTags();
+}
+
+function selectMode(mode) {
+  selectedMode = mode;
+  if (mode === 'practice') {
+    document.getElementById('card-practice').className = 'mode-card active-practice';
+    document.getElementById('card-exam').className     = 'mode-card';
+    document.getElementById('radio-practice').className = 'mode-radio on-blue';
+    document.getElementById('radio-exam').className     = 'mode-radio';
+  } else {
+    document.getElementById('card-exam').className      = 'mode-card active-exam';
+    document.getElementById('card-practice').className  = 'mode-card';
+    document.getElementById('radio-exam').className     = 'mode-radio on-amber';
+    document.getElementById('radio-practice').className = 'mode-radio';
+  }
+}
+
+function onSlider(val) {
+  document.getElementById('q-display').innerHTML = val + ' <span>Questions</span>';
+}
+
+function startSession() {
+  const count = parseInt(document.getElementById('q-slider').value);
+  sessionStorage.setItem('quizConfig', JSON.stringify({
+    mode: selectedMode,
+    count,
+    exam: selectedExam,
+    tags: selectedTags,
+  }));
+  location.href = 'quiz.html';
+}
+
+// 초기 렌더
+renderTags();
+</script>
+</body>
+</html>

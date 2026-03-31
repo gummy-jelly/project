@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>CloudPrep — Quiz</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&family=Orbitron:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<style>
+  :root {
+    --bg-base:#F5F7FF; --bg-1:#FFFFFF; --bg-2:#EEF1FA; --bg-3:#E3E8F5;
+    --border:#D4DAEE; --border-hi:#C0C9E2;
+    --text-1:#1A1E2E; --text-2:#4B5280; --text-3:#8A93B0;
+    --blue:#5B8BFF; --blue-dim:rgba(91,139,255,0.08); --blue-glow:rgba(91,139,255,0.15);
+    --green:#10B981; --green-dim:rgba(16,185,129,0.08);
+    --red:#E53E5E; --red-dim:rgba(229,62,94,0.08);
+    --amber:#F0A429;
+    --radius-sm:6px; --radius-md:10px; --radius-lg:14px; --radius-xl:20px;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'DM Sans', sans-serif; background: var(--bg-base);
+    color: var(--text-1); min-height: 100vh; display: flex; flex-direction: column;
+    background-image:
+      linear-gradient(rgba(91,139,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(91,139,255,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+  }
+
+  /* HEADER */
+  header {
+    position: sticky; top: 0; z-index: 100;
+    height: 60px; display: flex; align-items: center;
+    padding: 0 40px; gap: 24px;
+    background: rgba(245,247,255,0.92); backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .quit-btn {
+    display: flex; align-items: center; gap: 6px;
+    padding: 8px 14px; background: var(--bg-3);
+    border: 1px solid var(--border); border-radius: var(--radius-sm);
+    font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500;
+    color: var(--text-2); cursor: pointer; transition: all 0.15s; flex-shrink: 0;
+  }
+  .quit-btn:hover { border-color: var(--border-hi); color: var(--text-1); }
+  .quit-btn .material-symbols-rounded { font-size: 15px; }
+
+  .progress-center { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 5px; }
+  .progress-text { font-size: 12px; color: var(--text-3); }
+  .progress-text strong { color: var(--text-2); font-weight: 600; }
+  .progress-track {
+    width: 200px; height: 3px; background: var(--bg-3); border-radius: 99px; overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%; background: linear-gradient(90deg, var(--blue), #8B6FFF);
+    border-radius: 99px; transition: width 0.4s ease;
+  }
+
+  .timer-box {
+    display: none; align-items: center; gap: 7px;
+    padding: 8px 14px; border-radius: var(--radius-sm);
+    border: 1px solid rgba(240,164,41,0.3);
+    background: rgba(240,164,41,0.08); flex-shrink: 0;
+  }
+  .timer-box.show { display: flex; }
+  .timer-box .material-symbols-rounded { font-size: 16px; color: var(--amber); }
+  .timer-display {
+    font-family: 'Orbitron', sans-serif; font-size: 13px; font-weight: 500;
+    color: var(--amber); letter-spacing: 0;
+  }
+  .timer-box.urgent { border-color: rgba(255,95,126,0.4); background: rgba(255,95,126,0.08); }
+  .timer-box.urgent .material-symbols-rounded { color: var(--red); }
+  .timer-box.urgent .timer-display { color: var(--red); }
+
+  /* MAIN */
+  main { flex: 1; display: flex; flex-direction: column; align-items: center; padding: 44px 40px 120px; }
+
+  /* LOADING */
+  .loading {
+    display: flex; flex-direction: column; align-items: center; gap: 16px; padding: 80px 0;
+  }
+  .spinner {
+    width: 36px; height: 36px; border: 3px solid var(--border);
+    border-top-color: var(--blue); border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loading p { font-size: 13px; color: var(--text-3); }
+
+  /* QUIZ AREA */
+  .quiz-area { width: 100%; max-width: 900px; display: none; flex-direction: column; gap: 32px; }
+  .quiz-area.show { display: flex; animation: fadeUp 0.3s ease both; }
+  @keyframes fadeUp { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
+
+  /* TAGS */
+  .tag-row { display: flex; gap: 8px; }
+  .tag {
+    padding: 4px 10px; border-radius: 4px; font-size: 11px; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.5px;
+  }
+  .tag.saa   { background: var(--blue-dim);  color: var(--blue);  border: 1px solid rgba(91,139,255,0.2);  }
+  .tag.qnum  { background: var(--bg-3);       color: var(--text-3); border: 1px solid var(--border); font-family: 'Orbitron', sans-serif; font-weight: 400; }
+
+  /* QUESTION */
+  .q-en-label {
+    font-size: 10px; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 1px; color: var(--text-3); margin-bottom: 8px;
+  }
+  .q-en {
+    font-family: 'DM Sans', sans-serif; font-size: 22px; font-weight: 500;
+    line-height: 1.65; color: var(--text-1); letter-spacing: -0.1px;
+  }
+  .q-ko-wrap {
+    background: var(--bg-2); border: 1px solid var(--border);
+    border-radius: var(--radius-lg); padding: 22px 28px;
+  }
+  .q-ko-label {
+    font-size: 10px; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 1px; color: var(--text-3); margin-bottom: 8px;
+  }
+  .q-ko { font-size: 18px; color: var(--text-2); line-height: 1.75; }
+
+  /* OPTIONS */
+  .options { display: flex; flex-direction: column; gap: 10px; }
+  .option {
+    display: flex; align-items: flex-start; gap: 16px;
+    padding: 18px 22px;
+    background: var(--bg-2); border: 1px solid var(--border);
+    border-radius: var(--radius-lg); cursor: pointer;
+    transition: all 0.15s;
+  }
+  .option:hover:not(.disabled) { border-color: var(--blue); background: var(--bg-3); }
+  .option.selected-exam { border-color: var(--blue); background: var(--blue-dim); }
+  .option.correct  { border-color: var(--green); background: var(--green-dim); cursor: default; }
+  .option.wrong    { border-color: var(--red);   background: var(--red-dim);   cursor: default; opacity: 1; }
+  .option.answer   { border-color: var(--green); background: var(--green-dim); cursor: default; }
+  .option.disabled { cursor: default; opacity: 0.45; }
+
+  .option-key {
+    width: 32px; height: 32px; border-radius: 8px; flex-shrink: 0;
+    display: grid; place-items: center;
+    background: var(--bg-3); border: 1px solid var(--border);
+    font-family: 'Orbitron', sans-serif; font-size: 12px; font-weight: 500;
+    color: var(--text-3); transition: all 0.15s; margin-top: 2px;
+  }
+  .option.selected-exam .option-key { background: var(--blue); border-color: var(--blue); color: #fff; }
+  .option.correct .option-key { background: var(--green); border-color: var(--green); color: #fff; }
+  .option.wrong   .option-key { background: var(--red);   border-color: var(--red);   color: #fff; }
+  .option.answer  .option-key { background: var(--green); border-color: var(--green); color: #fff; }
+
+  .option-content { flex: 1; }
+  .option-text-ko { font-size: 16px; color: var(--text-1); line-height: 1.65; }
+  .option-text-en { font-size: 13px; color: var(--text-3); margin-top: 4px; line-height: 1.5; }
+
+  /* EXPLANATION */
+  .explanation-box {
+    display: none; background: var(--bg-2);
+    border: 1px solid rgba(91,139,255,0.2);
+    border-radius: var(--radius-lg); overflow: hidden;
+  }
+  .explanation-box.show { display: block; animation: fadeUp 0.3s ease both; }
+  .explanation-loading {
+    display: none; padding: 18px 22px; align-items: center; gap: 10px;
+  }
+  .explanation-loading.show { display: flex; }
+  .explanation-loading .mini-spinner {
+    width: 16px; height: 16px; border: 2px solid var(--border);
+    border-top-color: var(--blue); border-radius: 50%;
+    animation: spin 0.7s linear infinite; flex-shrink: 0;
+  }
+  .explanation-loading p { font-size: 13px; color: var(--text-3); }
+  .explanation-content { display: none; padding: 22px 28px; }
+  .explanation-content.show { display: block; }
+  .explanation-head {
+    display: flex; align-items: center; gap: 8px; margin-bottom: 10px;
+  }
+  .explanation-head .material-symbols-rounded { font-size: 16px; color: var(--blue); }
+  .explanation-head span {
+    font-size: 11px; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 0.8px; color: var(--blue);
+  }
+  .explanation-text { font-size: 15px; color: var(--text-2); line-height: 1.8; white-space: pre-wrap; }
+
+  /* FOOTER NAV */
+  footer {
+    position: fixed; bottom: 0; left: 0; right: 0;
+    background: rgba(245,247,255,0.95); backdrop-filter: blur(20px);
+    border-top: 1px solid var(--border);
+    padding: 14px 40px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .nav-btn {
+    display: flex; align-items: center; gap: 6px;
+    padding: 10px 20px; border-radius: var(--radius-md);
+    font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500;
+    cursor: pointer; transition: all 0.15s;
+  }
+  .nav-btn.prev {
+    background: none; border: 1px solid var(--border); color: var(--text-2);
+  }
+  .nav-btn.prev:hover:not(:disabled) { border-color: var(--border-hi); color: var(--text-1); }
+  .nav-btn.prev:disabled { opacity: 0.3; cursor: not-allowed; }
+  .nav-btn.next {
+    background: var(--blue); border: none; color: #fff;
+    padding: 10px 28px;
+    box-shadow: 0 4px 16px rgba(91,139,255,0.25);
+  }
+  .nav-btn.next:hover { background: #7099FF; transform: translateY(-1px); }
+  .nav-btn .material-symbols-rounded { font-size: 16px; }
+
+  .kbd-hint {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 11px; color: var(--text-3);
+  }
+  kbd {
+    padding: 2px 6px; background: var(--bg-3); border: 1px solid var(--border);
+    border-radius: 4px; font-size: 10px; font-family: 'Orbitron', sans-serif;
+    font-weight: 400;
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <button class="quit-btn" onclick="quitQuiz()">
+    <span class="material-symbols-rounded">logout</span>
+    <span id="quit-label">Quit</span>
+  </button>
+
+  <div class="progress-center">
+    <div class="progress-text"><strong id="progress-text">1 / ?</strong></div>
+    <div class="progress-track">
+      <div class="progress-fill" id="progress-fill" style="width:0%"></div>
+    </div>
+  </div>
+
+  <div style="display:flex;align-items:center;gap:10px;flex-shrink:0">
+    <!-- EN/KO 토글 -->
+    <button id="lang-toggle" onclick="toggleLang()" style="
+      display:flex;align-items:center;gap:0;
+      background:var(--bg-3);border:1px solid var(--border);
+      border-radius:var(--radius-sm);overflow:hidden;padding:0;cursor:pointer;
+    ">
+      <span id="lang-en" style="
+        padding:6px 12px;font-family:'Syne',sans-serif;font-size:11px;font-weight:700;
+        background:var(--blue);color:#fff;transition:all 0.2s;
+      ">EN</span>
+      <span id="lang-ko" style="
+        padding:6px 12px;font-family:'Syne',sans-serif;font-size:11px;font-weight:700;
+        background:transparent;color:var(--text-3);transition:all 0.2s;
+      ">KO</span>
+    </button>
+
+    <div class="timer-box" id="timer-box">
+      <span class="material-symbols-rounded">timer</span>
+      <span class="timer-display" id="timer-display">00:00</span>
+    </div>
+  </div>
+</header>
+
+<!-- MAIN -->
+<main>
+  <!-- Loading -->
+  <div class="loading" id="loading">
+    <div class="spinner"></div>
+    <p>문제 불러오는 중...</p>
+  </div>
+
+  <!-- Quiz Area -->
+  <div class="quiz-area" id="quiz-area">
+
+    <div class="tag-row">
+      <span class="tag saa">SAA</span>
+      <span class="tag qnum" id="q-num-tag">#1</span>
+    </div>
+
+    <div>
+      <div class="q-en" id="q-text-en"></div>
+    </div>
+
+    <div class="q-ko-wrap" id="q-ko-wrap">
+      <div class="q-ko" id="q-text-ko"></div>
+    </div>
+
+    <div class="options" id="options-section"></div>
+
+    <div class="explanation-box" id="explanation-box">
+      <div class="explanation-loading" id="explanation-loading">
+        <div class="mini-spinner"></div>
+        <p>AI 해설 생성 중...</p>
+      </div>
+      <div class="explanation-content" id="explanation-content">
+        <div class="explanation-head">
+          <span class="material-symbols-rounded">lightbulb</span>
+          <span>AI 해설</span>
+        </div>
+        <div class="explanation-text" id="explanation-text"></div>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<!-- FOOTER -->
+<footer>
+  <button class="nav-btn prev" id="btn-prev" onclick="prevQuestion()" disabled>
+    <span class="material-symbols-rounded">arrow_back</span>
+    Previous
+  </button>
+
+  <div class="kbd-hint">
+    Press <kbd>Enter</kbd> for next
+  </div>
+
+  <button class="nav-btn next" id="btn-next" onclick="nextQuestion()">
+    <span id="btn-next-label">Next Question</span>
+    <span class="material-symbols-rounded">arrow_forward</span>
+  </button>
+</footer>
+
+<script>
+const API   = 'http://localhost:4000/api';
+const token = localStorage.getItem('token');
+const user  = JSON.parse(localStorage.getItem('user') || 'null');
+if (!token || !user) location.href = 'login.html';
+
+const config = JSON.parse(sessionStorage.getItem('quizConfig') || 'null');
+if (!config) location.href = 'quiz_setup.html';
+
+const MODE  = config.mode;
+const COUNT = config.count;
+const EXAM  = config.exam || 'SAA';
+let questions = [], currentIdx = 0, selected = {};
+let timerSec = 0, timerInterval = null;
+let lang = 'en'; // 'en' | 'ko'
+
+function toggleLang() {
+  lang = lang === 'en' ? 'ko' : 'en';
+  const enBtn = document.getElementById('lang-en');
+  const koBtn = document.getElementById('lang-ko');
+  if (lang === 'en') {
+    enBtn.style.background = 'var(--blue)'; enBtn.style.color = '#fff';
+    koBtn.style.background = 'transparent'; koBtn.style.color = 'var(--text-3)';
+  } else {
+    koBtn.style.background = 'var(--blue)'; koBtn.style.color = '#fff';
+    enBtn.style.background = 'transparent'; enBtn.style.color = 'var(--text-3)';
+  }
+  renderQuestion();
+
+  // 이미 답 선택한 상태면 해설도 언어에 맞게 갱신
+  const q = questions[currentIdx];
+  if (q && selected[q.number] && MODE === 'practice') {
+    showExplanation(q);
+  }
+}
+
+async function apiFetch(path, options = {}) {
+  const res = await fetch(API + path, {
+    ...options,
+    headers: { 'Content-Type':'application/json', 'Authorization':'Bearer '+token, ...(options.headers||{}) },
+  });
+  if (res.status === 401) { localStorage.removeItem('token'); location.href = 'login.html'; }
+  return res.json();
+}
+
+async function loadQuestions() {
+  const data = await apiFetch(`/questions?exam=${EXAM}&page=1&limit=997`);
+  const all  = data.items;
+  for (let i = all.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [all[i], all[j]] = [all[j], all[i]];
+  }
+  questions = all.slice(0, COUNT);
+  document.getElementById('loading').style.display = 'none';
+  document.getElementById('quiz-area').classList.add('show');
+
+  if (MODE === 'exam') {
+    document.getElementById('quit-label').textContent = 'Quit Exam';
+    document.getElementById('timer-box').classList.add('show');
+    startTimer();
+  }
+  renderQuestion();
+}
+
+function startTimer() {
+  timerSec = COUNT * 90;
+  updateTimerDisplay();
+  timerInterval = setInterval(() => {
+    timerSec--;
+    updateTimerDisplay();
+    if (timerSec <= 300) document.getElementById('timer-box').classList.add('urgent');
+    if (timerSec <= 0) { clearInterval(timerInterval); finishExam(); }
+  }, 1000);
+}
+function updateTimerDisplay() {
+  const m = String(Math.floor(timerSec / 60)).padStart(2, '0');
+  const s = String(timerSec % 60).padStart(2, '0');
+  document.getElementById('timer-display').textContent = m + ':' + s;
+}
+
+function renderQuestion() {
+  const q = questions[currentIdx];
+  if (!q) return;
+
+  const pct = ((currentIdx + 1) / questions.length * 100).toFixed(1);
+  document.getElementById('progress-text').innerHTML = `<strong>${currentIdx + 1} / ${questions.length}</strong>`;
+  document.getElementById('progress-fill').style.width = pct + '%';
+  document.getElementById('q-num-tag').textContent = '#' + q.number;
+  document.getElementById('btn-prev').disabled = currentIdx === 0;
+  document.getElementById('btn-next-label').textContent = currentIdx === questions.length - 1 ? 'Finish' : 'Next Question';
+
+  document.getElementById('q-text-en').textContent = q.question_en;
+  document.getElementById('q-text-ko').textContent = q.question_ko || '(번역 준비 중)';
+
+  // 언어에 따라 전환 (단일 선언)
+  const isKo = lang === 'ko';
+  document.getElementById('q-text-en').closest('div').style.display = isKo ? 'none' : 'block';
+  document.getElementById('q-ko-wrap').style.display = isKo ? 'block' : 'none';
+
+  document.getElementById('explanation-box').classList.remove('show');
+  document.getElementById('explanation-loading').classList.remove('show');
+  document.getElementById('explanation-content').classList.remove('show');
+
+  const optSec  = document.getElementById('options-section');
+  const options = (isKo && q.options_ko) ? q.options_ko : q.options_en;
+  const keys    = Object.keys(options);
+  const sel     = selected[q.number];
+  const answered= !!sel;
+
+  optSec.innerHTML = keys.map(key => {
+    const text  = options[key];
+    const isSel = sel === key;
+    const isAns = q.correct_answer && key === q.correct_answer;
+    let cls = 'option';
+
+    if (MODE === 'practice' && answered) {
+      if (isSel && isAns)       cls += ' correct disabled';   // 맞음 → 초록
+      else if (isSel && !isAns) cls += ' wrong disabled';     // 틀림 → 빨강
+      else if (!isSel && isAns) cls += ' answer disabled';    // 정답 표시 → 초록
+      else                      cls += ' disabled';
+    } else if (MODE === 'exam' && isSel) {
+      cls += ' selected-exam';
+    }
+
+    return `
+      <div class="${cls}" onclick="selectOption('${key}')">
+        <div class="option-key">${key}</div>
+        <div class="option-content">
+          <div class="option-text-ko">${text}</div>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+async function selectOption(key) {
+  const q = questions[currentIdx];
+  if (!q || selected[q.number]) return;
+  selected[q.number] = key;
+  if (MODE === 'practice') {
+    const data = await apiFetch(`/questions/${q.number}/submit`, {
+      method: 'POST',
+      body: JSON.stringify({ selected: key }),
+    });
+    // 정답 + 해설 저장
+    q.correct_answer   = data.answer;
+    q.explanation_en   = data.explanation_en;
+    q.explanation_ko   = data.explanation_ko;
+    renderQuestion();
+    showExplanation(q);
+  } else {
+    renderQuestion();
+  }
+}
+
+function showExplanation(q) {
+  const box     = document.getElementById('explanation-box');
+  const loading = document.getElementById('explanation-loading');
+  const content = document.getElementById('explanation-content');
+  const text    = document.getElementById('explanation-text');
+
+  box.classList.add('show');
+  loading.classList.remove('show');
+
+  // 현재 언어에 맞는 해설 선택 (DB에서 이미 가져온 데이터)
+  const explanation = lang === 'ko'
+    ? (q.explanation_ko || q.explanation_en)
+    : (q.explanation_en || q.explanation_ko);
+
+  if (explanation) {
+    content.classList.add('show');
+    text.textContent = explanation;
+  } else {
+    // 해설 없는 문제
+    content.classList.add('show');
+    text.textContent = '해설 준비 중입니다.';
+  }
+}
+
+function prevQuestion() { if (currentIdx > 0) { currentIdx--; renderQuestion(); } }
+async function nextQuestion() {
+  if (currentIdx < questions.length - 1) { currentIdx++; renderQuestion(); }
+  else await finishExam();
+}
+
+async function finishExam() {
+  if (timerInterval) clearInterval(timerInterval);
+  if (MODE === 'exam') {
+    await Promise.all(questions.map(q => {
+      const sel = selected[q.number];
+      if (!sel) return Promise.resolve();
+      return apiFetch(`/questions/${q.number}/submit`, { method:'POST', body: JSON.stringify({ selected: sel }) });
+    }));
+  }
+  sessionStorage.setItem('quizResult', JSON.stringify({
+    questions: questions.map(q => ({ number: q.number, question_ko: q.question_ko, selected: selected[q.number] || null })),
+    mode: MODE, total: questions.length,
+  }));
+  location.href = 'quiz_result.html';
+}
+
+function quitQuiz() {
+  if (confirm('퀴즈를 종료하시겠습니까?')) {
+    if (timerInterval) clearInterval(timerInterval);
+    location.href = 'home.html';
+  }
+}
+
+document.addEventListener('keydown', (e) => { if (e.key === 'Enter') nextQuestion(); });
+loadQuestions();
+</script>
+</body>
+</html>

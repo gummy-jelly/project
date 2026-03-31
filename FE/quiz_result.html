@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>CloudPrep — 결과</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&family=Orbitron:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<style>
+  :root {
+    --bg-base:#F5F7FF; --bg-1:#FFFFFF; --bg-2:#EEF1FA; --bg-3:#E3E8F5;
+    --border:#D4DAEE; --border-hi:#C0C9E2;
+    --text-1:#1A1E2E; --text-2:#4B5280; --text-3:#8A93B0;
+    --blue:#5B8BFF; --blue-dim:rgba(91,139,255,0.08);
+    --green:#10B981; --green-dim:rgba(16,185,129,0.08);
+    --red:#E53E5E; --red-dim:rgba(229,62,94,0.08);
+    --radius-sm:6px; --radius-md:10px; --radius-lg:14px; --radius-xl:20px;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'DM Sans', sans-serif; background: var(--bg-base);
+    color: var(--text-1); min-height: 100vh; display: flex; flex-direction: column;
+    background-image:
+      linear-gradient(rgba(91,139,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(91,139,255,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+  }
+
+  /* HEADER */
+  header {
+    position: sticky; top: 0; z-index: 100;
+    height: 60px; display: flex; align-items: center;
+    padding: 0 40px; gap: 48px;
+    background: rgba(245,247,255,0.92); backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+  }
+  .logo { display: flex; align-items: center; gap: 9px; text-decoration: none; }
+  .logo-icon {
+    width: 30px; height: 30px; background: var(--blue);
+    border-radius: var(--radius-sm); display: grid; place-items: center;
+    font-size: 16px; color: #fff; font-variation-settings: 'FILL' 1;
+  }
+  .logo-text { font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 700; color: var(--text-1); letter-spacing: -0.3px; }
+  nav { display: flex; align-items: center; gap: 4px; }
+  nav a { padding: 6px 14px; border-radius: var(--radius-sm); font-size: 13px; font-weight: 500; text-decoration: none; color: var(--text-2); transition: all 0.15s; }
+  nav a:hover { color: var(--text-1); background: var(--bg-3); }
+  .header-right { margin-left: auto; }
+  .avatar {
+    width: 34px; height: 34px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--blue) 0%, #8B6FFF 100%);
+    display: grid; place-items: center;
+    font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700;
+    color: #fff; cursor: pointer;
+  }
+
+  /* MAIN */
+  main { max-width: 760px; margin: 0 auto; width: 100%; padding: 48px 24px 80px; display: flex; flex-direction: column; gap: 32px; }
+
+  /* SCORE CARD */
+  .score-card {
+    background: var(--bg-1); border: 1px solid var(--border);
+    border-radius: var(--radius-xl); padding: 40px;
+    display: flex; flex-direction: column; align-items: center; gap: 20px;
+    position: relative; overflow: hidden;
+    animation: fadeUp 0.4s ease both;
+  }
+  @keyframes fadeUp { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
+  .score-card::before {
+    content: ''; position: absolute; top: -60px; left: 50%; transform: translateX(-50%);
+    width: 300px; height: 300px;
+    background: radial-gradient(circle, var(--score-glow, rgba(91,139,255,0.12)) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  /* DONUT */
+  .donut-wrap { position: relative; width: 140px; height: 140px; }
+  .donut-svg { width: 140px; height: 140px; transform: rotate(-90deg); }
+  .donut-track { fill: none; stroke: var(--bg-3); stroke-width: 10; }
+  .donut-fill  { fill: none; stroke-width: 10; stroke-linecap: round; transition: stroke-dasharray 1s cubic-bezier(0.4,0,0.2,1); }
+  .donut-center {
+    position: absolute; inset: 0; display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+  }
+  .donut-pct {
+    font-family: 'Orbitron', sans-serif; font-size: 24px; font-weight: 600;
+    line-height: 1; letter-spacing: -0.5px;
+  }
+
+  .score-title { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 700; }
+  .pass-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 6px 16px; border-radius: 99px;
+    font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700;
+  }
+  .pass-badge.passed  { background: var(--green-dim); color: var(--green); border: 1px solid rgba(45,212,160,0.25); }
+  .pass-badge.failed  { background: var(--red-dim);   color: var(--red);   border: 1px solid rgba(255,95,126,0.25); }
+  .pass-badge .material-symbols-rounded { font-size: 15px; }
+
+  .score-detail { font-size: 13px; color: var(--text-2); }
+
+  /* SUMMARY STATS */
+  .summary-row {
+    display: flex; gap: 12px; width: 100%;
+    animation: fadeUp 0.4s 0.1s ease both;
+  }
+  .summary-stat {
+    flex: 1; background: var(--bg-2); border: 1px solid var(--border);
+    border-radius: var(--radius-lg); padding: 16px 20px;
+    display: flex; flex-direction: column; gap: 4; align-items: center;
+  }
+  .summary-stat .val {
+    font-family: 'Orbitron', sans-serif; font-size: 20px; font-weight: 500;
+    line-height: 1; margin-bottom: 4px;
+  }
+  .summary-stat .lbl { font-size: 11px; color: var(--text-3); text-transform: uppercase; letter-spacing: 0.5px; }
+  .summary-stat.correct .val { color: var(--green); }
+  .summary-stat.wrong .val   { color: var(--red); }
+  .summary-stat.skipped .val { color: var(--text-3); }
+
+  /* ANSWER GRID */
+  .answer-section { animation: fadeUp 0.4s 0.2s ease both; }
+  .answer-section-head {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 16px;
+  }
+  .answer-section-head h2 {
+    font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 700;
+  }
+  .badge-row { display: flex; gap: 8px; }
+  .badge {
+    font-size: 10px; font-weight: 600; padding: 3px 10px;
+    border-radius: 4px; text-transform: uppercase; letter-spacing: 0.5px;
+  }
+  .badge.c { background: var(--green-dim); color: var(--green); }
+  .badge.w { background: var(--red-dim);   color: var(--red);   }
+  .badge.s { background: var(--bg-3);      color: var(--text-3); }
+
+  .answer-grid { display: grid; grid-template-columns: repeat(10, 1fr); gap: 8px; }
+  .ans-cell {
+    aspect-ratio: 1; border-radius: var(--radius-sm);
+    display: grid; place-items: center;
+    font-family: 'Orbitron', sans-serif; font-size: 9px; font-weight: 400;
+    border: 1px solid var(--border);
+    background: var(--bg-2);
+    flex-direction: column; gap: 2px;
+  }
+  .ans-cell .ans-num { font-size: 8px; color: var(--text-3); }
+  .ans-cell .material-symbols-rounded { font-size: 14px; font-variation-settings: 'FILL' 1; }
+  .ans-cell.correct { border-color: rgba(45,212,160,0.3); background: var(--green-dim); }
+  .ans-cell.correct .material-symbols-rounded { color: var(--green); }
+  .ans-cell.wrong   { border-color: rgba(255,95,126,0.3); background: var(--red-dim); }
+  .ans-cell.wrong   .material-symbols-rounded { color: var(--red); }
+  .ans-cell.skipped .material-symbols-rounded { color: var(--text-3); }
+
+  /* FOOTER ACTIONS */
+  .result-actions {
+    display: flex; align-items: center; justify-content: center; gap: 12px;
+    animation: fadeUp 0.4s 0.3s ease both;
+  }
+  .action-btn {
+    display: flex; align-items: center; gap: 8px;
+    padding: 12px 24px; border-radius: var(--radius-md);
+    font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700;
+    cursor: pointer; transition: all 0.2s; text-decoration: none;
+  }
+  .action-btn.secondary {
+    background: none; border: 1px solid var(--border); color: var(--text-2);
+  }
+  .action-btn.secondary:hover { border-color: var(--border-hi); color: var(--text-1); }
+  .action-btn.primary {
+    background: var(--blue); border: none; color: #fff;
+    box-shadow: 0 4px 16px rgba(91,139,255,0.25);
+  }
+  .action-btn.primary:hover { background: #7099FF; transform: translateY(-1px); }
+  .action-btn .material-symbols-rounded { font-size: 16px; }
+</style>
+</head>
+<body>
+
+<header>
+  <a href="home.html" class="logo">
+    <span class="logo-icon material-symbols-rounded">school</span>
+    <span class="logo-text">CloudPrep</span>
+  </a>
+  <nav>
+    <a href="home.html">대시보드</a>
+    <a href="quiz_setup.html">문제 풀기</a>
+  </nav>
+  <div class="header-right">
+    <div class="avatar" id="user-avatar">?</div>
+  </div>
+</header>
+
+<main>
+
+  <!-- Score Card -->
+  <div class="score-card" id="score-card">
+    <div class="donut-wrap">
+      <svg class="donut-svg" viewBox="0 0 140 140">
+        <circle class="donut-track" cx="70" cy="70" r="58"/>
+        <circle class="donut-fill" id="donut-fill" cx="70" cy="70" r="58"
+          stroke-dasharray="0 364" stroke="#5B8BFF"/>
+      </svg>
+      <div class="donut-center">
+        <div class="donut-pct" id="score-pct">--</div>
+      </div>
+    </div>
+    <div class="score-title">AWS SAA 결과</div>
+    <div class="pass-badge" id="pass-badge">계산 중...</div>
+    <div class="score-detail" id="score-detail"></div>
+  </div>
+
+  <!-- Summary stats -->
+  <div class="summary-row" id="summary-row">
+    <div class="summary-stat correct">
+      <div class="val" id="stat-correct">-</div>
+      <div class="lbl">Correct</div>
+    </div>
+    <div class="summary-stat wrong">
+      <div class="val" id="stat-wrong">-</div>
+      <div class="lbl">Incorrect</div>
+    </div>
+    <div class="summary-stat skipped">
+      <div class="val" id="stat-skipped">-</div>
+      <div class="lbl">Skipped</div>
+    </div>
+  </div>
+
+  <!-- Answer grid -->
+  <div class="answer-section">
+    <div class="answer-section-head">
+      <h2>Answer Summary</h2>
+      <div class="badge-row">
+        <span class="badge c" id="badge-correct">- Correct</span>
+        <span class="badge w" id="badge-wrong">- Wrong</span>
+        <span class="badge s" id="badge-skipped" style="display:none">- Skipped</span>
+      </div>
+    </div>
+    <div class="answer-grid" id="answer-grid"></div>
+  </div>
+
+  <!-- Actions -->
+  <div class="result-actions">
+    <button class="action-btn secondary" onclick="location.href='quiz_setup.html'">
+      <span class="material-symbols-rounded">replay</span>
+      다시 풀기
+    </button>
+    <button class="action-btn primary" onclick="location.href='home.html'">
+      <span class="material-symbols-rounded">dashboard</span>
+      대시보드로
+    </button>
+  </div>
+
+</main>
+
+<script>
+const API   = 'http://localhost:4000/api';
+const token = localStorage.getItem('token');
+const user  = JSON.parse(localStorage.getItem('user') || 'null');
+if (!token || !user) location.href = 'login.html';
+
+document.getElementById('user-avatar').textContent = user.email[0].toUpperCase();
+
+const result = JSON.parse(sessionStorage.getItem('quizResult') || 'null');
+if (!result) location.href = 'home.html';
+
+const { questions, mode, total } = result;
+
+async function apiFetch(path, options = {}) {
+  const res = await fetch(API + path, {
+    ...options,
+    headers: { 'Content-Type':'application/json', 'Authorization':'Bearer '+token, ...(options.headers||{}) },
+  });
+  if (res.status === 401) { localStorage.removeItem('token'); location.href = 'login.html'; }
+  return res.json();
+}
+
+async function loadResults() {
+  const details = await Promise.all(questions.map(q => apiFetch(`/questions/${q.number}`)));
+  let correct = 0, wrong = 0, skipped = 0;
+
+  const grid = document.getElementById('answer-grid');
+  grid.innerHTML = questions.map((q, i) => {
+    const sel = q.selected;
+    if (!sel) {
+      skipped++;
+      return `<div class="ans-cell skipped" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px">
+        <span class="ans-num">Q${i+1}</span>
+        <span class="material-symbols-rounded" style="font-variation-settings:'FILL' 0,'wght' 300">remove</span>
+      </div>`;
+    }
+    const isCorrect = sel === details[i].answer;
+    if (isCorrect) correct++; else wrong++;
+    return `<div class="ans-cell ${isCorrect ? 'correct' : 'wrong'}" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px">
+      <span class="ans-num">Q${i+1}</span>
+      <span class="material-symbols-rounded">${isCorrect ? 'check_circle' : 'cancel'}</span>
+    </div>`;
+  }).join('');
+
+  const pct    = total > 0 ? Math.round(correct / total * 100) : 0;
+  const passed = pct >= 72;
+  const color  = passed ? '#2DD4A0' : '#FF5F7E';
+  const glow   = passed ? 'rgba(45,212,160,0.12)' : 'rgba(255,95,126,0.12)';
+
+  // Donut
+  const circumference = 2 * Math.PI * 58;
+  const dash = (pct / 100) * circumference;
+  const donut = document.getElementById('donut-fill');
+  donut.style.stroke = color;
+  setTimeout(() => { donut.setAttribute('stroke-dasharray', `${dash} ${circumference}`); }, 100);
+
+  document.getElementById('score-card').style.setProperty('--score-glow', glow);
+  document.getElementById('score-pct').textContent = pct + '%';
+  document.getElementById('score-pct').style.color = color;
+
+  const badge = document.getElementById('pass-badge');
+  badge.className = 'pass-badge ' + (passed ? 'passed' : 'failed');
+  badge.innerHTML = `<span class="material-symbols-rounded" style="font-variation-settings:'FILL' 1">${passed ? 'check_circle' : 'cancel'}</span> ${passed ? 'PASSED' : 'NOT PASSED'}`;
+
+  document.getElementById('score-detail').textContent = `${total}문제 중 ${correct}문제 정답`;
+
+  document.getElementById('stat-correct').textContent = correct;
+  document.getElementById('stat-wrong').textContent   = wrong;
+  document.getElementById('stat-skipped').textContent = skipped;
+
+  document.getElementById('badge-correct').textContent = correct + ' Correct';
+  document.getElementById('badge-wrong').textContent   = wrong + ' Wrong';
+  if (skipped > 0) {
+    const sb = document.getElementById('badge-skipped');
+    sb.style.display = 'inline-flex';
+    sb.textContent = skipped + ' Skipped';
+  }
+}
+
+loadResults();
+</script>
+</body>
+</html>

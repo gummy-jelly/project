@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>CloudPrep</title>
+<style>
+  body {
+    margin: 0;
+    background: #F5F7FF;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    font-family: sans-serif;
+  }
+  .spinner {
+    width: 32px; height: 32px;
+    border: 3px solid #D4DAEE;
+    border-top-color: #5B8BFF;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+<div class="spinner"></div>
+<script>
+  const token = localStorage.getItem('token');
+  const user  = localStorage.getItem('user');
+  // 토큰이 있으면 home, 없어도 home (비로그인 허용)
+  location.replace('home.html');
+</script>
+</body>
+</html>

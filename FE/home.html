@@ -1,0 +1,917 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>CloudPrep — 대시보드</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&family=Orbitron:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<style>
+  :root {
+    --bg-base:    #F5F7FF;
+    --bg-1:       #FFFFFF;
+    --bg-2:       #EEF1FA;
+    --bg-3:       #E3E8F5;
+    --border:     #D4DAEE;
+    --border-hi:  #C0C9E2;
+    --text-1:     #1A1E2E;
+    --text-2:     #4B5280;
+    --text-3:     #8A93B0;
+    --blue:       #5B8BFF;
+    --blue-glow:  rgba(91,139,255,0.15);
+    --blue-dim:   rgba(91,139,255,0.08);
+    --green:      #10B981;
+    --green-dim:  rgba(16,185,129,0.08);
+    --amber:      #F0A429;
+    --red:        #E53E5E;
+    --radius-sm:  6px;
+    --radius-md:  10px;
+    --radius-lg:  14px;
+    --radius-xl:  20px;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg-base);
+    color: var(--text-1);
+    min-height: 100vh;
+    line-height: 1.6;
+    /* subtle grid overlay */
+    background-image:
+      linear-gradient(rgba(91,139,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(91,139,255,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+  }
+
+  /* ─── HEADER ─────────────────────────────── */
+  header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(245,247,255,0.92);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+    height: 60px;
+    display: flex;
+    align-items: center;
+    padding: 0 40px;
+    gap: 48px;
+  }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    text-decoration: none;
+    flex-shrink: 0;
+  }
+  .logo-icon {
+    width: 30px; height: 30px;
+    background: var(--blue);
+    border-radius: var(--radius-sm);
+    display: grid;
+    place-items: center;
+    font-size: 16px;
+    font-variation-settings: 'FILL' 1;
+    color: #fff;
+  }
+  .logo-text {
+    font-family: 'Syne', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text-1);
+    letter-spacing: -0.3px;
+  }
+
+  nav {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex: 1;
+  }
+  nav a {
+    padding: 6px 14px;
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    font-weight: 500;
+    text-decoration: none;
+    color: var(--text-2);
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+  nav a:hover { color: var(--text-1); background: var(--bg-3); }
+  nav a.active {
+    color: var(--blue);
+    background: var(--blue-dim);
+  }
+
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-left: auto;
+  }
+  .icon-btn {
+    width: 34px; height: 34px;
+    border-radius: var(--radius-sm);
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+    transition: all 0.15s;
+    color: var(--text-2);
+    font-size: 18px;
+    font-variation-settings: 'FILL' 0, 'wght' 300;
+  }
+  .icon-btn:hover { border-color: var(--border-hi); color: var(--text-1); }
+
+  .avatar {
+    width: 34px; height: 34px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--blue) 0%, #8B6FFF 100%);
+    display: grid;
+    place-items: center;
+    font-family: 'Syne', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    color: #fff;
+    cursor: pointer;
+    box-shadow: 0 0 0 2px rgba(91,139,255,0.35);
+    transition: box-shadow 0.2s;
+  }
+  .avatar:hover {
+    box-shadow: 0 0 0 3px rgba(91,139,255,0.5);
+  }
+
+  /* 드롭다운 래퍼 */
+  .avatar-wrap {
+    position: relative;
+  }
+
+  /* 드롭다운 메뉴 */
+  .avatar-dropdown {
+    display: none;
+    position: absolute;
+    top: calc(100% + 10px);
+    right: 0;
+    width: 180px;
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+    z-index: 200;
+    animation: dropIn 0.15s ease;
+  }
+  @keyframes dropIn {
+    from { opacity: 0; transform: translateY(-6px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .avatar-dropdown.open { display: block; }
+
+  .dropdown-header {
+    padding: 14px 16px 10px;
+    border-bottom: 1px solid var(--border);
+  }
+  .dropdown-header .d-name {
+    font-family: 'Syne', sans-serif;
+    font-size: 13px; font-weight: 700;
+    color: var(--text-1);
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .dropdown-header .d-email {
+    font-size: 11px; color: var(--text-3); margin-top: 2px;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+
+  .dropdown-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 11px 16px;
+    font-size: 13px; font-weight: 500; color: var(--text-2);
+    cursor: pointer; transition: all 0.15s;
+    border: none; background: none; width: 100%; text-align: left;
+    font-family: 'DM Sans', sans-serif;
+  }
+  .dropdown-item:hover { background: var(--bg-3); color: var(--text-1); }
+  .dropdown-item.danger:hover { background: rgba(255,95,126,0.08); color: var(--red); }
+  .dropdown-item .material-symbols-rounded {
+    font-size: 16px;
+    font-variation-settings: 'FILL' 0, 'wght' 300;
+  }
+  .dropdown-divider {
+    height: 1px; background: var(--border); margin: 0;
+  }
+
+  /* ─── MAIN ───────────────────────────────── */
+  main {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 44px 40px 80px;
+    display: flex;
+    flex-direction: column;
+    gap: 36px;
+  }
+
+  /* ─── HERO GREETING ──────────────────────── */
+  .hero-row {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 24px;
+  }
+  .greeting h2 {
+    font-family: 'Syne', sans-serif;
+    font-size: 30px;
+    font-weight: 700;
+    color: var(--text-1);
+    letter-spacing: -0.5px;
+    line-height: 1.2;
+  }
+  .greeting h2 span { color: var(--blue); }
+  .greeting p {
+    margin-top: 6px;
+    font-size: 14px;
+    color: var(--text-2);
+  }
+
+  .stat-pills {
+    display: flex;
+    gap: 10px;
+  }
+  .stat-pill {
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 14px 20px;
+    min-width: 110px;
+    text-align: center;
+    transition: border-color 0.2s;
+  }
+  .stat-pill:hover { border-color: var(--border-hi); }
+  .stat-pill .label {
+    font-size: 10px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--text-3);
+    margin-bottom: 6px;
+  }
+  .stat-pill .value {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 20px;
+    font-weight: 500;
+    line-height: 1;
+    letter-spacing: 0;
+  }
+  .stat-pill.total .value  { color: var(--text-1); }
+  .stat-pill.correct .value { color: var(--green); }
+  .stat-pill.acc .value    { color: var(--blue); }
+
+  /* ─── CTA BANNER ─────────────────────────── */
+  .cta-banner {
+    position: relative;
+    background: var(--bg-1);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-xl);
+    padding: 28px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    overflow: hidden;
+  }
+  .cta-banner::before {
+    content: '';
+    position: absolute;
+    left: -60px; top: -60px;
+    width: 240px; height: 240px;
+    background: radial-gradient(circle, rgba(91,139,255,0.12) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .cta-banner::after {
+    content: '';
+    position: absolute;
+    right: 200px; bottom: -40px;
+    width: 160px; height: 160px;
+    background: radial-gradient(circle, rgba(45,212,160,0.07) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .cta-left { position: relative; z-index: 1; }
+  .cta-left h3 {
+    font-family: 'Syne', sans-serif;
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+    margin-bottom: 5px;
+  }
+  .cta-left p {
+    font-size: 13px;
+    color: var(--text-2);
+  }
+  .progress-bar-wrap {
+    margin-top: 14px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .progress-bar-track {
+    flex: 1;
+    max-width: 280px;
+    height: 4px;
+    background: var(--bg-3);
+    border-radius: 99px;
+    overflow: hidden;
+  }
+  .progress-bar-fill {
+    height: 100%;
+    width: 24.7%;
+    background: linear-gradient(90deg, var(--blue), #8B6FFF);
+    border-radius: 99px;
+  }
+  .progress-label {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 9px;
+    font-weight: 400;
+    color: var(--text-3);
+    white-space: nowrap;
+    letter-spacing: 0;
+  }
+
+  .cta-btn {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding: 13px 28px;
+    background: var(--blue);
+    border: none;
+    border-radius: var(--radius-md);
+    font-family: 'Syne', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    color: #fff;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.2s;
+    box-shadow: 0 0 0 0 rgba(91,139,255,0.4);
+    flex-shrink: 0;
+  }
+  .cta-btn:hover {
+    background: #7099FF;
+    transform: translateY(-1px);
+    box-shadow: 0 8px 24px rgba(91,139,255,0.3);
+  }
+  .cta-btn .material-symbols-rounded { font-size: 18px; }
+
+  /* ─── LEADERBOARD GRID ───────────────────── */
+  .lb-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+
+  .card {
+    background: var(--bg-1);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-xl);
+    overflow: hidden;
+    transition: border-color 0.2s;
+  }
+  .card:hover { border-color: var(--border-hi); }
+
+  .card-head {
+    padding: 20px 24px 16px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+  }
+  .card-head h3 {
+    font-family: 'Syne', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: -0.2px;
+  }
+  .card-head span {
+    font-size: 11px;
+    color: var(--text-3);
+  }
+
+  /* Rank rows */
+  .rank-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 13px 24px;
+    border-bottom: 1px solid var(--border);
+    transition: background 0.15s;
+  }
+  .rank-row:last-child { border-bottom: none; }
+  .rank-row:hover { background: var(--bg-2); }
+  .rank-row.me {
+    background: var(--blue-dim);
+    border-color: rgba(91,139,255,0.15);
+  }
+
+  .rank-num {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 10px;
+    font-weight: 400;
+    color: var(--text-3);
+    width: 18px;
+    text-align: right;
+    flex-shrink: 0;
+  }
+  .rank-num.gold   { color: #F0A429; }
+  .rank-num.silver { color: #94A3B8; }
+  .rank-num.bronze { color: #C26D3A; }
+
+  .rank-avatar {
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    font-family: 'Syne', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+  .rank-avatar.me-av {
+    background: linear-gradient(135deg, var(--blue) 0%, #8B6FFF 100%);
+    color: #fff;
+  }
+  .rank-avatar.other {
+    background: var(--bg-3);
+    color: var(--text-2);
+    border: 1px solid var(--border);
+  }
+
+  .rank-info { flex: 1; min-width: 0; }
+  .rank-name {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-1);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .rank-name.me-name { color: var(--blue); }
+  .rank-sub {
+    font-size: 10px;
+    color: var(--text-3);
+    margin-top: 1px;
+  }
+
+  .rank-score { text-align: right; flex-shrink: 0; }
+  .rank-score .val {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-1);
+    display: block;
+    letter-spacing: 0;
+  }
+  .rank-score .val.me-val { color: var(--blue); }
+  .rank-score .unit {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 7px;
+    font-weight: 400;
+    color: var(--text-3);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .card-foot {
+    padding: 12px 24px;
+    border-top: 1px solid var(--border);
+    text-align: center;
+  }
+  .card-foot button {
+    background: none;
+    border: none;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--blue);
+    cursor: pointer;
+    opacity: 0.7;
+    transition: opacity 0.15s;
+  }
+  .card-foot button:hover { opacity: 1; }
+
+  /* Accuracy bars */
+  .acc-row {
+    padding: 14px 24px;
+    border-bottom: 1px solid var(--border);
+    transition: background 0.15s;
+  }
+  .acc-row:last-child { border-bottom: none; }
+  .acc-row:hover { background: var(--bg-2); }
+  .acc-row.me { background: var(--blue-dim); }
+
+  .acc-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 9px;
+  }
+  .acc-name-wrap {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .acc-rank {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 10px;
+    color: var(--text-3);
+    width: 16px;
+  }
+  .acc-name {
+    font-size: 12px;
+    color: var(--text-1);
+    max-width: 180px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .acc-name.me-name { color: var(--blue); font-weight: 600; }
+  .acc-pct {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0;
+  }
+  .acc-pct.hi   { color: var(--green); }
+  .acc-pct.mid  { color: var(--blue); }
+  .acc-pct.low  { color: var(--text-2); }
+
+  .bar-track {
+    height: 3px;
+    background: var(--bg-3);
+    border-radius: 99px;
+    overflow: hidden;
+  }
+  .bar-fill {
+    height: 100%;
+    border-radius: 99px;
+    transition: width 0.8s cubic-bezier(0.4,0,0.2,1);
+  }
+  .bar-fill.hi  { background: linear-gradient(90deg, var(--green), #22C55E); }
+  .bar-fill.mid { background: linear-gradient(90deg, var(--blue), #8B6FFF); }
+  .bar-fill.low { background: var(--bg-3); }
+
+  .acc-sub {
+    margin-top: 5px;
+    font-size: 10px;
+    color: var(--text-3);
+  }
+
+  /* ─── FOOTER ──────────────────────────────── */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 20px 40px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  footer .fl {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: var(--text-3);
+  }
+  footer .fl .material-symbols-rounded { font-size: 16px; color: var(--blue); }
+  footer .fr { font-size: 11px; color: var(--text-3); }
+
+  /* ─── ANIMATIONS ──────────────────────────── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .hero-row   { animation: fadeUp 0.5s ease both; }
+  .cta-banner { animation: fadeUp 0.5s 0.08s ease both; }
+  .lb-grid    { animation: fadeUp 0.5s 0.16s ease both; }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <a href="#" class="logo">
+    <span class="logo-icon material-symbols-rounded" style="font-variation-settings:'FILL' 1,'wght' 500">school</span>
+    <span class="logo-text">CloudPrep</span>
+  </a>
+
+  <nav>
+    <a href="#" class="active">대시보드</a>
+    <a href="#">문제 풀기</a>
+    <a href="#">리더보드</a>
+  </nav>
+
+  <div class="header-right">
+    <div class="icon-btn" id="notif-btn">
+      <span class="material-symbols-rounded" style="font-variation-settings:'FILL' 0,'wght' 300;font-size:17px">notifications</span>
+    </div>
+
+    <!-- 아바타 + 드롭다운 -->
+    <div class="avatar-wrap" id="avatar-wrap">
+      <div class="avatar" id="user-avatar">J</div>
+      <div class="avatar-dropdown" id="avatar-dropdown">
+        <div class="dropdown-header">
+          <div class="d-name" id="dropdown-name">---</div>
+          <div class="d-email" id="dropdown-email">---</div>
+        </div>
+        <button class="dropdown-item" onclick="goMyPage()">
+          <span class="material-symbols-rounded">person</span>
+          마이페이지
+        </button>
+        <div class="dropdown-divider"></div>
+        <button class="dropdown-item danger" onclick="doLogout()">
+          <span class="material-symbols-rounded">logout</span>
+          로그아웃
+        </button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- MAIN -->
+<main>
+
+  <!-- Hero row -->
+  <div class="hero-row">
+    <div class="greeting">
+      <h2>안녕하세요, <span>Joonhee</span> 님 👋</h2>
+      <p>오늘도 AWS 자격증을 향해 나아가세요.</p>
+    </div>
+    <div class="stat-pills">
+      <div class="stat-pill total">
+        <div class="label">총 푼 문제</div>
+        <div class="value">247</div>
+      </div>
+      <div class="stat-pill correct">
+        <div class="label">맞은 문제</div>
+        <div class="value">189</div>
+      </div>
+      <div class="stat-pill acc">
+        <div class="label">정확도</div>
+        <div class="value">76%</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CTA Banner -->
+  <div class="cta-banner">
+    <div class="cta-left">
+      <h3>오늘의 학습을 시작하세요</h3>
+      <p>AWS Solutions Architect Associate · 997문제</p>
+      <div class="progress-bar-wrap">
+        <div class="progress-bar-track">
+          <div class="progress-bar-fill"></div>
+        </div>
+        <span class="progress-label">247 / 997 완료</span>
+      </div>
+    </div>
+    <button class="cta-btn" onclick="goToQuiz()">
+      <span class="material-symbols-rounded" style="font-variation-settings:'FILL' 1,'wght' 600">play_arrow</span>
+      문제 풀기 시작
+    </button>
+  </div>
+
+  <!-- Leaderboard grid -->
+  <div class="lb-grid">
+
+    <!-- 많이 푼 순위 -->
+    <div class="card">
+      <div class="card-head">
+        <h3>많이 푼 순위</h3>
+        <span>총 문제 수 기준</span>
+      </div>
+      <div id="lb-total">
+        <div class="rank-row"><span style="color:var(--text-3);font-size:13px;padding:8px 0">불러오는 중...</span></div>
+      </div>
+      <div class="card-foot">
+        <button onclick="loadTotalLeaderboard(20)">전체 보기 →</button>
+      </div>
+    </div>
+
+    <!-- 정확도 순위 -->
+    <div class="card">
+      <div class="card-head">
+        <h3>정확도 순위</h3>
+        <span>정답률 기준 (최소 10문제)</span>
+      </div>
+      <div id="lb-accuracy">
+        <div class="acc-row"><span style="color:var(--text-3);font-size:13px">불러오는 중...</span></div>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<!-- FOOTER -->
+<footer>
+  <div class="fl">
+    <span class="material-symbols-rounded" style="font-variation-settings:'FILL' 1">quiz</span>
+    CloudPrep 학습 플랫폼
+  </div>
+  <div class="fr">© 2025 CloudPrep</div>
+</footer>
+
+<script>
+const API   = 'http://localhost:4000/api';
+const token = localStorage.getItem('token');
+const user  = JSON.parse(localStorage.getItem('user') || 'null');
+const isLoggedIn = !!(token && user);
+
+// ── 유저 정보 표시 ────────────────────────────────────────
+document.querySelector('.greeting h2').innerHTML = isLoggedIn
+  ? `안녕하세요, <span>${user.email.split('@')[0]}</span> 님 👋`
+  : `CloudPrep에 <span>오신 것을</span> 환영해요 👋`;
+
+document.querySelector('.greeting p').textContent = isLoggedIn
+  ? '오늘도 AWS 자격증을 향해 나아가세요.'
+  : '로그인하고 학습을 시작해보세요.';
+
+if (isLoggedIn) {
+  const emailId = user.email.split('@')[0];
+  document.getElementById('user-avatar').textContent   = user.email[0].toUpperCase();
+  document.getElementById('dropdown-name').textContent  = emailId;
+  document.getElementById('dropdown-email').textContent = user.email;
+} else {
+  document.getElementById('user-avatar').textContent = '?';
+  document.querySelector('.stat-pills').style.display = 'none';
+}
+
+// ── 드롭다운 토글 ──────────────────────────────────────────
+document.getElementById('user-avatar').addEventListener('click', (e) => {
+  e.stopPropagation();
+  document.getElementById('avatar-dropdown').classList.toggle('open');
+});
+
+// 외부 클릭 시 닫기
+document.addEventListener('click', () => {
+  document.getElementById('avatar-dropdown').classList.remove('open');
+});
+
+function goMyPage() {
+  document.getElementById('avatar-dropdown').classList.remove('open');
+  location.href = 'mypage.html';
+}
+
+function doLogout() {
+  document.getElementById('avatar-dropdown').classList.remove('open');
+  if (confirm('로그아웃 하시겠습니까?')) {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    location.href = 'login.html';
+  }
+}
+
+// 비로그인 시 아바타 클릭 → 로그인
+if (!isLoggedIn) {
+  document.getElementById('user-avatar').addEventListener('click', (e) => {
+    e.stopPropagation();
+    location.href = 'login.html';
+  });
+}
+
+// ── 문제 풀기 버튼 ────────────────────────────────────────
+function goToQuiz() {
+  if (!isLoggedIn) {
+    sessionStorage.setItem('redirectAfterLogin', 'quiz_setup.html');
+    location.href = 'login.html';
+  } else {
+    location.href = 'quiz_setup.html';
+  }
+}
+
+// ── API 공통 ──────────────────────────────────────────────
+async function apiFetch(path) {
+  const res = await fetch(API + path, {
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + token,
+    },
+  });
+  if (res.status === 401) {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    location.href = 'login.html';
+    return null;
+  }
+  return res.json();
+}
+
+// ── 내 통계 ───────────────────────────────────────────────
+if (isLoggedIn) {
+  apiFetch('/stats/me').then(data => {
+    document.querySelector('.stat-pill.total .value').textContent  = data.total ?? 0;
+    document.querySelector('.stat-pill.correct .value').textContent= data.correct ?? 0;
+    document.querySelector('.stat-pill.acc .value').textContent    = (data.accuracy ?? 0) + '%';
+
+    // CTA 배너 진행률 업데이트
+    const total = data.total ?? 0;
+    const pct   = Math.round((total / 997) * 100 * 10) / 10;
+    document.querySelector('.progress-bar-fill').style.width = pct + '%';
+    document.querySelector('.progress-label').textContent    = `${total} / 997 완료`;
+    document.querySelector('.cta-left p').textContent        = `AWS Solutions Architect Associate · 997문제`;
+  }).catch(() => {});
+}
+
+// ── 리더보드 헬퍼 ─────────────────────────────────────────
+const RANK_COLORS = ['gold', 'silver', 'bronze'];
+
+function initials(email) {
+  return email ? email[0].toUpperCase() : '?';
+}
+
+function isMe(row) {
+  return isLoggedIn && row.id === user.id;
+}
+
+// ── 공통 fetch (토큰 없어도 됨) ──────────────────────────
+async function publicFetch(path) {
+  try {
+    const headers = { 'Content-Type': 'application/json' };
+    if (token) headers['Authorization'] = 'Bearer ' + token;
+    const res = await fetch(API + path, { headers });
+    if (!res.ok) return null;
+    return res.json();
+  } catch { return null; }
+}
+
+// ── 많이 푼 순위 렌더 ─────────────────────────────────────
+async function loadTotalLeaderboard(limit = 5) {
+  const container = document.getElementById('lb-total');
+  const data = await publicFetch(`/stats/leaderboard?type=total&limit=${limit}`);
+
+  if (!data || !data.length) {
+    container.innerHTML = '<div class="rank-row"><span style="color:var(--text-3);font-size:13px">아직 데이터가 없습니다.</span></div>';
+    return;
+  }
+
+    container.innerHTML = data.map((row, i) => {
+      const me        = isMe(row);
+      const rankClass = RANK_COLORS[i] || '';
+      return `
+        <div class="rank-row ${me ? 'me' : ''}">
+          <span class="rank-num ${rankClass}">${i + 1}</span>
+          <div class="rank-avatar ${me ? 'me-av' : 'other'}">${initials(row.email)}</div>
+          <div class="rank-info">
+            <div class="rank-name ${me ? 'me-name' : ''}">${me ? '나 (' + row.email + ')' : row.email}</div>
+            <div class="rank-sub">정답률 ${row.accuracy}%</div>
+          </div>
+          <div class="rank-score">
+            <span class="val ${me ? 'me-val' : ''}">${row.total.toLocaleString()}</span>
+            <span class="unit">solved</span>
+          </div>
+        </div>`;
+    }).join('');
+}
+
+// ── 정확도 순위 렌더 ──────────────────────────────────────
+async function loadAccuracyLeaderboard() {
+  const container = document.getElementById('lb-accuracy');
+  const data = await publicFetch('/stats/leaderboard?type=accuracy&limit=5');
+  const filtered = data ? data.filter(r => r.total >= 10) : [];
+
+  if (!filtered.length) {
+    container.innerHTML = '<div class="acc-row"><span style="color:var(--text-3);font-size:13px">최소 10문제 이상 풀어야 표시됩니다.</span></div>';
+    return;
+  }
+
+  container.innerHTML = filtered.map((row, i) => {
+    const me  = isMe(row);
+    const pct = row.accuracy;
+    const accClass = pct >= 80 ? 'hi' : pct >= 60 ? 'mid' : 'low';
+    const barColor  = pct >= 80 ? 'var(--green)' : pct >= 60 ? 'var(--blue)' : 'var(--text-3)';
+    return `
+      <div class="acc-row ${me ? 'me' : ''}">
+        <div class="acc-top">
+          <div class="acc-name-wrap">
+            <span class="acc-rank">${String(i + 1).padStart(2, '0')}</span>
+            <span class="acc-name ${me ? 'me-name' : ''}">${me ? '나 (' + row.email + ')' : row.email}</span>
+          </div>
+          <span class="acc-pct ${accClass}">${pct}%</span>
+        </div>
+        <div class="bar-track">
+          <div class="bar-fill" style="width:${pct}%;background:${barColor}"></div>
+        </div>
+        <div class="acc-sub">${row.total.toLocaleString()}문제 풀었음</div>
+      </div>`;
+  }).join('');
+}
+
+// ── 초기 로드 ─────────────────────────────────────────────
+loadTotalLeaderboard(5);
+loadAccuracyLeaderboard();
+</script>
+</body>
+</html>

@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>CloudPrep — 마이페이지</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&family=Orbitron:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<style>
+  :root {
+    --bg-base:#F5F7FF; --bg-1:#FFFFFF; --bg-2:#EEF1FA; --bg-3:#E3E8F5;
+    --border:#D4DAEE; --border-hi:#C0C9E2;
+    --text-1:#1A1E2E; --text-2:#4B5280; --text-3:#8A93B0;
+    --blue:#5B8BFF; --blue-dim:rgba(91,139,255,0.08);
+    --green:#10B981; --green-dim:rgba(16,185,129,0.08);
+    --red:#E53E5E; --red-dim:rgba(229,62,94,0.08);
+    --amber:#F0A429;
+    --radius-sm:6px; --radius-md:10px; --radius-lg:14px; --radius-xl:20px;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg-base); color: var(--text-1);
+    min-height: 100vh; display: flex; flex-direction: column;
+    background-image:
+      linear-gradient(rgba(91,139,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(91,139,255,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+  }
+
+  /* HEADER */
+  header {
+    height: 60px; display: flex; align-items: center; padding: 0 40px;
+    gap: 48px; border-bottom: 1px solid var(--border);
+    background: rgba(245,247,255,0.92); backdrop-filter: blur(20px);
+    position: sticky; top: 0; z-index: 100;
+  }
+  .logo { display: flex; align-items: center; gap: 9px; text-decoration: none; }
+  .logo-icon { width: 30px; height: 30px; background: var(--blue); border-radius: var(--radius-sm); display: grid; place-items: center; font-size: 16px; color: #fff; }
+  .logo-text { font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 700; color: var(--text-1); }
+  nav { display: flex; align-items: center; gap: 4px; flex: 1; }
+  nav a { padding: 6px 14px; border-radius: var(--radius-sm); font-size: 13px; font-weight: 500; text-decoration: none; color: var(--text-2); transition: all 0.15s; }
+  nav a:hover { color: var(--text-1); background: var(--bg-3); }
+  nav a.active { color: var(--blue); background: var(--blue-dim); }
+  .header-right { margin-left: auto; }
+  .back-btn {
+    display: flex; align-items: center; gap: 6px;
+    padding: 8px 16px; background: var(--bg-3);
+    border: 1px solid var(--border); border-radius: var(--radius-md);
+    font-size: 13px; font-weight: 500; color: var(--text-2);
+    cursor: pointer; text-decoration: none; transition: all 0.15s;
+  }
+  .back-btn:hover { border-color: var(--border-hi); color: var(--text-1); }
+  .back-btn .material-symbols-rounded { font-size: 16px; }
+
+  /* MAIN */
+  main {
+    flex: 1; max-width: 760px; width: 100%;
+    margin: 0 auto; padding: 48px 24px;
+    display: flex; flex-direction: column; gap: 24px;
+  }
+
+  .page-title {
+    font-family: 'Syne', sans-serif; font-size: 24px; font-weight: 700;
+    letter-spacing: -0.4px; margin-bottom: 4px;
+  }
+  .page-sub { font-size: 13px; color: var(--text-3); }
+
+  /* CARD */
+  .card {
+    background: var(--bg-1); border: 1px solid var(--border);
+    border-radius: var(--radius-xl); overflow: hidden;
+  }
+  .card-head {
+    padding: 20px 28px; border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 10px;
+  }
+  .card-head .material-symbols-rounded { font-size: 18px; color: var(--blue); }
+  .card-head h2 { font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 700; }
+  .card-body { padding: 28px; }
+
+  /* 아바타 프리뷰 */
+  .avatar-preview-row {
+    display: flex; align-items: center; gap: 24px; margin-bottom: 28px;
+  }
+  .avatar-preview {
+    width: 80px; height: 80px; border-radius: 50%;
+    display: grid; place-items: center;
+    font-family: 'Syne', sans-serif; font-size: 28px; font-weight: 700;
+    color: #fff; flex-shrink: 0; transition: all 0.3s;
+    box-shadow: 0 0 0 3px rgba(91,139,255,0.3);
+  }
+  .avatar-preview-info h3 {
+    font-family: 'Syne', sans-serif; font-size: 18px; font-weight: 700;
+    margin-bottom: 4px;
+  }
+  .avatar-preview-info p { font-size: 13px; color: var(--text-3); }
+
+  /* 아바타 색상 선택 */
+  .section-label {
+    font-size: 10px; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 1px; color: var(--text-3); margin-bottom: 12px;
+  }
+  .color-grid {
+    display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 24px;
+  }
+  .color-swatch {
+    width: 44px; height: 44px; border-radius: 50%;
+    cursor: pointer; transition: all 0.2s;
+    border: 3px solid transparent;
+    position: relative;
+  }
+  .color-swatch:hover { transform: scale(1.1); }
+  .color-swatch.selected {
+    border-color: #fff;
+    box-shadow: 0 0 0 2px var(--blue);
+  }
+  .color-swatch.selected::after {
+    content: '';
+    position: absolute; inset: 0;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.2);
+  }
+
+  /* 아바타 이모지/이니셜 선택 */
+  .avatar-type-tabs {
+    display: flex; gap: 4px; margin-bottom: 16px;
+    background: var(--bg-3); border-radius: var(--radius-md);
+    padding: 4px;
+  }
+  .avatar-tab {
+    flex: 1; padding: 8px; text-align: center;
+    border-radius: var(--radius-sm); font-size: 13px; font-weight: 500;
+    cursor: pointer; color: var(--text-3); transition: all 0.15s;
+    border: none; background: none; font-family: 'DM Sans', sans-serif;
+  }
+  .avatar-tab.active { background: var(--bg-1); color: var(--text-1); }
+
+  .emoji-grid {
+    display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 24px;
+  }
+  .emoji-btn {
+    width: 44px; height: 44px; border-radius: var(--radius-md);
+    display: grid; place-items: center;
+    font-size: 22px; cursor: pointer;
+    background: var(--bg-2); border: 2px solid var(--border);
+    transition: all 0.15s;
+  }
+  .emoji-btn:hover { border-color: var(--border-hi); background: var(--bg-3); }
+  .emoji-btn.selected { border-color: var(--blue); background: var(--blue-dim); }
+
+  /* 통계 */
+  .stat-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;
+  }
+  .stat-item {
+    background: var(--bg-2); border: 1px solid var(--border);
+    border-radius: var(--radius-lg); padding: 18px;
+    text-align: center;
+  }
+  .stat-item .val {
+    font-family: 'Orbitron', sans-serif; font-size: 22px;
+    font-weight: 500; margin-bottom: 4px;
+  }
+  .stat-item .val.blue   { color: var(--blue); }
+  .stat-item .val.green  { color: var(--green); }
+  .stat-item .val.amber  { color: var(--amber); }
+  .stat-item .lbl { font-size: 11px; color: var(--text-3); }
+
+  /* 비밀번호 변경 */
+  .form-group { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; }
+  .form-label { font-size: 12px; font-weight: 500; color: var(--text-2); }
+  .form-input {
+    padding: 11px 14px; background: var(--bg-2);
+    border: 1px solid var(--border); border-radius: var(--radius-md);
+    font-family: 'DM Sans', sans-serif; font-size: 14px;
+    color: var(--text-1); outline: none; transition: all 0.15s; width: 100%;
+  }
+  .form-input:focus { border-color: var(--blue); }
+  .form-input::placeholder { color: var(--text-3); }
+
+  /* 버튼 */
+  .btn-primary {
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+    padding: 11px 24px; background: var(--blue); border: none;
+    border-radius: var(--radius-md); font-family: 'Syne', sans-serif;
+    font-size: 13px; font-weight: 700; color: #fff;
+    cursor: pointer; transition: all 0.2s; width: 100%;
+  }
+  .btn-primary:hover { background: #7099FF; }
+  .btn-primary .material-symbols-rounded { font-size: 16px; }
+
+  .btn-danger {
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+    padding: 11px 24px; background: var(--red-dim);
+    border: 1px solid rgba(255,95,126,0.2);
+    border-radius: var(--radius-md); font-family: 'Syne', sans-serif;
+    font-size: 13px; font-weight: 700; color: var(--red);
+    cursor: pointer; transition: all 0.2s; width: 100%;
+  }
+  .btn-danger:hover { background: rgba(255,95,126,0.15); }
+
+  /* 토스트 알림 */
+  .toast {
+    position: fixed; bottom: 32px; left: 50%; transform: translateX(-50%) translateY(20px);
+    background: var(--bg-3); border: 1px solid var(--border);
+    border-radius: var(--radius-lg); padding: 12px 20px;
+    display: flex; align-items: center; gap: 8px;
+    font-size: 13px; font-weight: 500; color: var(--text-1);
+    opacity: 0; transition: all 0.3s; pointer-events: none; z-index: 999;
+    white-space: nowrap;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  .toast.success .material-symbols-rounded { color: var(--green); font-size: 16px; }
+  .toast.error   .material-symbols-rounded { color: var(--red);   font-size: 16px; }
+</style>
+</head>
+<body>
+
+<header>
+  <a href="home.html" class="logo">
+    <span class="logo-icon material-symbols-rounded">school</span>
+    <span class="logo-text">CloudPrep</span>
+  </a>
+  <nav>
+    <a href="home.html">대시보드</a>
+    <a href="quiz_setup.html">문제 풀기</a>
+    <a href="mypage.html" class="active">마이페이지</a>
+  </nav>
+  <div class="header-right">
+    <a href="home.html" class="back-btn">
+      <span class="material-symbols-rounded">arrow_back</span>
+      돌아가기
+    </a>
+  </div>
+</header>
+
+<main>
+  <div>
+    <h1 class="page-title">마이페이지</h1>
+    <p class="page-sub">프로필과 계정 설정을 관리하세요</p>
+  </div>
+
+  <!-- 아바타 설정 -->
+  <div class="card">
+    <div class="card-head">
+      <span class="material-symbols-rounded">face</span>
+      <h2>아바타 설정</h2>
+    </div>
+    <div class="card-body">
+
+      <!-- 프리뷰 -->
+      <div class="avatar-preview-row">
+        <div class="avatar-preview" id="avatar-preview" style="background: linear-gradient(135deg, #5B8BFF, #8B6FFF)">
+          <span id="avatar-content">?</span>
+        </div>
+        <div class="avatar-preview-info">
+          <h3 id="preview-name">---</h3>
+          <p id="preview-email">---</p>
+        </div>
+      </div>
+
+      <!-- 탭 -->
+      <div class="avatar-type-tabs">
+        <button class="avatar-tab active" id="tab-initial" onclick="switchTab('initial')">이니셜</button>
+        <button class="avatar-tab" id="tab-emoji" onclick="switchTab('emoji')">이모지</button>
+      </div>
+
+      <!-- 이니셜 탭 -->
+      <div id="panel-initial">
+        <div class="section-label">배경 색상</div>
+        <div class="color-grid" id="color-grid"></div>
+      </div>
+
+      <!-- 이모지 탭 -->
+      <div id="panel-emoji" style="display:none">
+        <div class="section-label">이모지 선택</div>
+        <div class="emoji-grid" id="emoji-grid"></div>
+      </div>
+
+      <button class="btn-primary" onclick="saveAvatar()">
+        <span class="material-symbols-rounded">save</span>
+        아바타 저장
+      </button>
+    </div>
+  </div>
+
+  <!-- 내 통계 -->
+  <div class="card">
+    <div class="card-head">
+      <span class="material-symbols-rounded">bar_chart</span>
+      <h2>학습 통계</h2>
+    </div>
+    <div class="card-body">
+      <div class="stat-grid">
+        <div class="stat-item">
+          <div class="val blue" id="stat-total">—</div>
+          <div class="lbl">총 푼 문제</div>
+        </div>
+        <div class="stat-item">
+          <div class="val green" id="stat-correct">—</div>
+          <div class="lbl">정답</div>
+        </div>
+        <div class="stat-item">
+          <div class="val amber" id="stat-acc">—</div>
+          <div class="lbl">정답률</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 계정 정보 -->
+  <div class="card">
+    <div class="card-head">
+      <span class="material-symbols-rounded">lock</span>
+      <h2>비밀번호 변경</h2>
+    </div>
+    <div class="card-body">
+      <div class="form-group">
+        <label class="form-label">현재 비밀번호</label>
+        <input type="password" class="form-input" id="pw-current" placeholder="현재 비밀번호 입력"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">새 비밀번호</label>
+        <input type="password" class="form-input" id="pw-new" placeholder="새 비밀번호 (6자 이상)"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">새 비밀번호 확인</label>
+        <input type="password" class="form-input" id="pw-confirm" placeholder="새 비밀번호 재입력"/>
+      </div>
+      <button class="btn-primary" onclick="changePassword()">
+        <span class="material-symbols-rounded">lock_reset</span>
+        비밀번호 변경
+      </button>
+    </div>
+  </div>
+
+  <!-- 로그아웃 -->
+  <div class="card">
+    <div class="card-body">
+      <button class="btn-danger" onclick="doLogout()">
+        <span class="material-symbols-rounded">logout</span>
+        로그아웃
+      </button>
+    </div>
+  </div>
+
+</main>
+
+<!-- 토스트 -->
+<div class="toast" id="toast">
+  <span class="material-symbols-rounded" id="toast-icon">check_circle</span>
+  <span id="toast-msg">저장되었습니다</span>
+</div>
+
+<script>
+const API   = 'http://localhost:4000/api';
+const token = localStorage.getItem('token');
+const user  = JSON.parse(localStorage.getItem('user') || 'null');
+if (!token || !user) location.href = 'login.html';
+
+// ── 아바타 색상 팔레트 ───────────────────────────────────
+const COLORS = [
+  { id: 'blue',    bg: 'linear-gradient(135deg, #5B8BFF, #8B6FFF)' },
+  { id: 'teal',    bg: 'linear-gradient(135deg, #2DD4A0, #059669)' },
+  { id: 'coral',   bg: 'linear-gradient(135deg, #FF6B6B, #FF8E53)' },
+  { id: 'pink',    bg: 'linear-gradient(135deg, #F093FB, #F5576C)' },
+  { id: 'amber',   bg: 'linear-gradient(135deg, #F0A429, #E05F00)' },
+  { id: 'indigo',  bg: 'linear-gradient(135deg, #667EEA, #764BA2)' },
+  { id: 'cyan',    bg: 'linear-gradient(135deg, #4FACFE, #00F2FE)' },
+  { id: 'lime',    bg: 'linear-gradient(135deg, #43E97B, #38F9D7)' },
+  { id: 'rose',    bg: 'linear-gradient(135deg, #FA709A, #FEE140)' },
+  { id: 'dark',    bg: 'linear-gradient(135deg, #2C3E50, #4CA1AF)' },
+];
+
+const EMOJIS = ['🚀','⭐','🔥','💎','🎯','🦊','🐯','🦁','🐉','🦄','🎮','🏆','🌙','⚡','🍀','🎸','🤖','👾','🦋','🌈'];
+
+// 저장된 아바타 설정 불러오기
+let avatarSettings = JSON.parse(localStorage.getItem('avatarSettings') || 'null') || {
+  type: 'initial',
+  colorId: 'blue',
+  emoji: null,
+};
+
+let currentTab = avatarSettings.type === 'emoji' ? 'emoji' : 'initial';
+
+// ── 초기화 ───────────────────────────────────────────────
+function init() {
+  // 유저 정보 표시
+  const emailId = user.email.split('@')[0];
+  document.getElementById('preview-name').textContent  = emailId;
+  document.getElementById('preview-email').textContent = user.email;
+
+  // 색상 그리드 렌더
+  const colorGrid = document.getElementById('color-grid');
+  COLORS.forEach(c => {
+    const el = document.createElement('div');
+    el.className = 'color-swatch' + (c.id === avatarSettings.colorId ? ' selected' : '');
+    el.style.background = c.bg;
+    el.onclick = () => selectColor(c.id, el);
+    colorGrid.appendChild(el);
+  });
+
+  // 이모지 그리드 렌더
+  const emojiGrid = document.getElementById('emoji-grid');
+  EMOJIS.forEach(e => {
+    const el = document.createElement('div');
+    el.className = 'emoji-btn' + (e === avatarSettings.emoji ? ' selected' : '');
+    el.textContent = e;
+    el.onclick = () => selectEmoji(e, el);
+    emojiGrid.appendChild(el);
+  });
+
+  // 탭 초기화
+  if (currentTab === 'emoji') switchTab('emoji');
+  updatePreview();
+  loadStats();
+}
+
+function updatePreview() {
+  const preview = document.getElementById('avatar-preview');
+  const content = document.getElementById('avatar-content');
+
+  if (avatarSettings.type === 'emoji' && avatarSettings.emoji) {
+    preview.style.background = 'var(--bg-3)';
+    content.style.fontSize = '36px';
+    content.textContent = avatarSettings.emoji;
+  } else {
+    const color = COLORS.find(c => c.id === avatarSettings.colorId) || COLORS[0];
+    preview.style.background = color.bg;
+    content.style.fontSize = '28px';
+    content.textContent = user.email[0].toUpperCase();
+  }
+}
+
+function switchTab(tab) {
+  currentTab = tab;
+  document.getElementById('tab-initial').classList.toggle('active', tab === 'initial');
+  document.getElementById('tab-emoji').classList.toggle('active', tab === 'emoji');
+  document.getElementById('panel-initial').style.display = tab === 'initial' ? 'block' : 'none';
+  document.getElementById('panel-emoji').style.display   = tab === 'emoji'   ? 'block' : 'none';
+}
+
+function selectColor(colorId, el) {
+  document.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('selected'));
+  el.classList.add('selected');
+  avatarSettings.colorId = colorId;
+  avatarSettings.type    = 'initial';
+  avatarSettings.emoji   = null;
+  document.querySelectorAll('.emoji-btn').forEach(b => b.classList.remove('selected'));
+  updatePreview();
+}
+
+function selectEmoji(emoji, el) {
+  document.querySelectorAll('.emoji-btn').forEach(b => b.classList.remove('selected'));
+  el.classList.add('selected');
+  avatarSettings.emoji = emoji;
+  avatarSettings.type  = 'emoji';
+  updatePreview();
+}
+
+function saveAvatar() {
+  localStorage.setItem('avatarSettings', JSON.stringify(avatarSettings));
+  showToast('아바타가 저장되었습니다', 'success');
+}
+
+// ── 통계 ─────────────────────────────────────────────────
+async function loadStats() {
+  try {
+    const res = await fetch(API + '/stats/me', {
+      headers: { 'Authorization': 'Bearer ' + token }
+    });
+    if (!res.ok) return;
+    const data = await res.json();
+    document.getElementById('stat-total').textContent   = data.total   ?? 0;
+    document.getElementById('stat-correct').textContent = data.correct ?? 0;
+    document.getElementById('stat-acc').textContent     = (data.accuracy ?? 0) + '%';
+  } catch {}
+}
+
+// ── 비밀번호 변경 ─────────────────────────────────────────
+async function changePassword() {
+  const current = document.getElementById('pw-current').value;
+  const newPw   = document.getElementById('pw-new').value;
+  const confirm = document.getElementById('pw-confirm').value;
+
+  if (!current || !newPw || !confirm) {
+    showToast('모든 항목을 입력해주세요', 'error'); return;
+  }
+  if (newPw.length < 6) {
+    showToast('새 비밀번호는 6자 이상이어야 합니다', 'error'); return;
+  }
+  if (newPw !== confirm) {
+    showToast('새 비밀번호가 일치하지 않습니다', 'error'); return;
+  }
+  // 나중에 API 연결
+  showToast('비밀번호가 변경되었습니다', 'success');
+  document.getElementById('pw-current').value = '';
+  document.getElementById('pw-new').value     = '';
+  document.getElementById('pw-confirm').value = '';
+}
+
+// ── 로그아웃 ─────────────────────────────────────────────
+function doLogout() {
+  if (confirm('로그아웃 하시겠습니까?')) {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    location.href = 'login.html';
+  }
+}
+
+// ── 토스트 ───────────────────────────────────────────────
+let toastTimer = null;
+function showToast(msg, type = 'success') {
+  const toast = document.getElementById('toast');
+  const icon  = document.getElementById('toast-icon');
+  const text  = document.getElementById('toast-msg');
+
+  toast.className = `toast ${type}`;
+  icon.textContent = type === 'success' ? 'check_circle' : 'error';
+  text.textContent = msg;
+
+  void toast.offsetWidth;
+  toast.classList.add('show');
+
+  if (toastTimer) clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => toast.classList.remove('show'), 2500);
+}
+
+init();
+</script>
+</body>
+</html>
