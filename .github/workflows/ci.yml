@@ -1,0 +1,39 @@
+name: CI Pipeline
+
+on:
+  push:
+    branches: ["master"]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 코드 체크아웃
+        uses: actions/checkout@v3
+
+      - name: Node.js 설정
+        uses: actions/setup-node@v3
+        with:
+          node-version: "22"
+
+      - name: 의존성 설치
+        run: |
+          cd BE 
+          npm install
+
+      - name: Slack 성공 알림
+        if: success()
+        uses: rtCamp/action-slack-notify@v2
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_MESSAGE: "빌드 성공! ${{ github.event.head_commit.message }}"
+          SLACK_COLOR: good
+
+      - name: Slack 실패 알림
+        if: failure()
+        uses: rtCamp/action-slack-notify@v2
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_MESSAGE: "빌드 실패! ${{ github.event.head_commit.message }}"
+          SLACK_COLOR: danger
