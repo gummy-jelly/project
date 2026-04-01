@@ -1,0 +1,15 @@
+# 환경변수
+.env
+BE/.env
+
+# DB dump
+mysql/init/dump.sql
+
+# 의존성
+BE/node_modules
+
+# Mac 시스템파일
+.DS_Store
+
+# pem 키
+*.pem
